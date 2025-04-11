@@ -4,8 +4,9 @@ import Link from "next/link";
 import { PatientForm } from "@/components/forms/PatientForm";
 import { PasskeyModal } from "@/components/PasskeyModal";
 //import { ModeToggle } from "./ModeToggle";
+
 const Home = async ({ searchParams }: SearchParamProps) => {
-  const isAdmin = (await searchParams?.admin) === "true";
+  const isAdmin = searchParams?.admin === "true";
 
   return (
     <div className="flex h-screen max-h-screen">
@@ -14,11 +15,12 @@ const Home = async ({ searchParams }: SearchParamProps) => {
       <section className="remove-scrollbar container my-auto">
         <div className="sub-container max-w-[496px]">
           <Image
-            src="/assets/icons/logo-full.svg"
+            src="/assets/gifs/mmu.gif"
             height={1000}
             width={1000}
             alt="patient"
-            className="mb-12 h-10 w-fit"
+            className="size-[1%] w-fit"
+            unoptimized
           />
 
           <PatientForm />
