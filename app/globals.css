@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import "tailwindcss";
+
 /* ========================================== TAILWIND STYLES */
 @layer base {
   /* Remove scrollbar */
