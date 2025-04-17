@@ -21,6 +21,8 @@ import "react-datepicker/dist/react-datepicker.css";
 import CustomFormField, { FormFieldType } from "../CustomFormField";
 import SubmitButton from "../SubmitButton";
 import { Form } from "../ui/form";
+import { showToast } from "../react_toastfy/showToast";
+import { toast } from "react-toastify";
 
 export const AppointmentForm = ({
   userId,
@@ -83,9 +85,14 @@ export const AppointmentForm = ({
         };
 
         const newAppointment = await createAppointment(appointment);
+        showToast(
+          "success",
+          <p>Your Appointment has been received successfully!</p>
+        );
 
         if (newAppointment) {
           form.reset();
+
           router.push(
             `/patients/${userId}/new-appointment/success?appointmentId=${newAppointment.$id}`
           );

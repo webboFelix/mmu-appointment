@@ -25,6 +25,7 @@ import "react-phone-number-input/style.css";
 import CustomFormField, { FormFieldType } from "../CustomFormField";
 import { FileUploader } from "../FileUploader";
 import SubmitButton from "../SubmitButton";
+import { showToast } from "../react_toastfy/showToast";
 
 const RegisterForm = ({ user }: { user: User }) => {
   const router = useRouter();
@@ -88,6 +89,8 @@ const RegisterForm = ({ user }: { user: User }) => {
       };
 
       const newPatient = await registerPatient(patient);
+
+      showToast("success", <p>Your Information is racorded successfully</p>);
 
       if (newPatient) {
         router.push(`/patients/${user.$id}/new-appointment`);

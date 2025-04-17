@@ -7,12 +7,14 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { Form } from "@/components/ui/form";
-import { createUser } from "@/lib/actions/patient.actions";
+//import { createUser } from "@/lib/actions/patient.actions";
 import { UserFormValidation } from "@/lib/validation";
 
 import "react-phone-number-input/style.css";
 import CustomFormField, { FormFieldType } from "../CustomFormField";
 import SubmitButton from "../SubmitButton";
+import { createUser } from "@/lib/actions/patient.actions";
+import { showToast } from "../react_toastfy/showToast";
 
 export const PatientForm = () => {
   const router = useRouter();
@@ -30,14 +32,21 @@ export const PatientForm = () => {
   const onSubmit = async (values: z.infer<typeof UserFormValidation>) => {
     setIsLoading(true);
 
+    const pass = crypto.randomUUID(); // or any random string
+    console.log("your pass", pass);
     try {
       const user = {
         name: values.name,
         email: values.email,
         phone: values.phone,
+        password: pass,
       };
 
       const newUser = await createUser(user);
+      showToast(
+        "success",
+        <strong>Welcome to MMU appointment dashboard!</strong>
+      );
 
       if (newUser) {
         router.push(`/patients/${newUser.$id}/register`);

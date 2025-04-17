@@ -23,7 +23,7 @@ export const createUser = async (user: CreateUserParams) => {
       ID.unique(),
       user.email,
       user.phone,
-      undefined,
+      "2895uffffg87r483g$", // or any random string
       user.name
     );
 

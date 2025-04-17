@@ -100,19 +100,23 @@ export const getRecentAppointmentList = async () => {
   }
 };
 
-//  SEND SMS NOTIFICATION
-export const sendSMSNotification = async (userId: string, content: string) => {
+//  SEND EMAIL NOTIFICATION
+export const sendEmailNotification = async (
+  userId: string,
+  subject: string,
+  content: string
+) => {
   try {
-    // https://appwrite.io/docs/references/1.5.x/server-nodejs/messaging#createSms
-    const message = await messaging.createSms(
+    const message = await messaging.createEmail(
       ID.unique(),
+      subject,
       content,
-      [],
-      [userId]
+      [], // CC
+      [userId] // Recipients
     );
     return parseStringify(message);
   } catch (error) {
-    console.error("An error occurred while sending sms:", error);
+    console.error("An error occurred while sending email:", error);
   }
 };
 
@@ -125,7 +129,6 @@ export const updateAppointment = async ({
   type,
 }: UpdateAppointmentParams) => {
   try {
-    // Update appointment to scheduled -> https://appwrite.io/docs/references/cloud/server-nodejs/databases#updateDocument
     const updatedAppointment = await databases.updateDocument(
       DATABASE_ID!,
       APPOINTMENT_COLLECTION_ID!,
@@ -135,8 +138,61 @@ export const updateAppointment = async ({
 
     if (!updatedAppointment) throw Error;
 
-    const smsMessage = `Greetings from MMU Dispensary. ${type === "schedule" ? `Your appointment is confirmed for ${formatDateTime(appointment.schedule!, timeZone).dateTime} with Dr. ${appointment.primaryPhysician}` : `We regret to inform that your appointment for ${formatDateTime(appointment.schedule!, timeZone).dateTime} is cancelled. Reason:  ${appointment.cancellationReason}`}.`;
-    await sendSMSNotification(userId, smsMessage);
+    const scheduleTime = formatDateTime(
+      appointment.schedule!,
+      timeZone
+    ).dateTime;
+
+    // 🔹 Subject based on appointment type
+    const subject =
+      type === "schedule"
+        ? "Your Appointment is Confirmed - MMU Dispensary"
+        : "Your Appointment has been Cancelled - MMU Dispensary";
+
+    // 🔹 Email content message
+    const emailMessage = `
+  <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9;">
+    <div style="max-width: 600px; margin: auto; background: #ffffff; padding: 20px; border-radius: 8px;">
+      
+      <h2 style="color: #10b981; text-align: center;">MMU Dispensary</h2>
+
+      <img 
+        src="http://localhost:3000/gifs/mmu.gif" 
+        alt="MMU Dispensary Banner" 
+        style="display: block; margin: 0 auto 20px auto; max-width: 100%; border-radius: 6px;"
+      />
+
+      <p style="font-size: 16px;">Dear Valued Patient,</p>
+
+      <p style="font-size: 16px;">
+        ${
+          type === "schedule"
+            ? `We are pleased to inform you that your appointment has been <strong>successfully scheduled</strong> for <strong>${scheduleTime}</strong> with Dr. <strong>${appointment.primaryPhysician}</strong>.`
+            : `We regret to inform you that your appointment originally scheduled for <strong>${scheduleTime}</strong> has been <strong>cancelled</strong>.<br/><br/>Reason: <em>${appointment.cancellationReason}</em>.`
+        }
+      </p>
+
+      <hr style="margin: 30px 0;" />
+
+      <p style="font-size: 15px; line-height: 1.6; color: #444;">
+        MMU Dispensary is committed to offering high-quality, compassionate care to the university community. 
+        Our services include general consultations, chronic illness management, preventive screenings, 
+        vaccination programs, reproductive health support, and mental wellness services.
+        <br/><br/>
+        We aim to ensure your health and wellbeing are always a priority through accessible and professional medical services.
+      </p>
+
+      <p style="margin-top: 30px; font-size: 14px; color: #666;">
+        Warm regards,<br/>
+        <strong>MMU Dispensary Team</strong><br/>
+        <em>Your Health, Our Priority.</em>
+      </p>
+
+    </div>
+  </div>
+`;
+
+    await sendEmailNotification(userId, subject, emailMessage);
 
     revalidatePath("/admin");
     return parseStringify(updatedAppointment);
