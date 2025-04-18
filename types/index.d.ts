@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-//mag:
+//mag: searchParams
 declare type SearchParamProps = {
   params: { [key: string]: string };
   searchParams: { [key: string]: string | string[] | undefined };
